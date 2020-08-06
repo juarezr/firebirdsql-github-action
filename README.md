@@ -53,6 +53,16 @@ enable_wire_crypt
 container_name
 : The name for tagging the container
 
-# License
+# Misc
+
+## Status
+
+![testing_changes](https://github.com/juarezr/firebirdsql-github-action/workflows/testing_changes/badge.svg)
+
+## License
 
 The scripts and documentation in this project are released under the [GPL License](LICENSE)
+
+## Funding
+
+[<img alt="Send some cookies" src="http://img.shields.io/liberapay/receives/juarezr.svg?label=Send%20some%20cookies&logo=liberapay">](https://liberapay.com/juarezr/donate)

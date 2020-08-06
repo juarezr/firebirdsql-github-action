@@ -20,7 +20,7 @@ echo '# Creating the docker database...'
 
 echo '# Querying the docker database...'
 
-echo 'select * from rdb$database;' | isql-fb -u MY_USER -p my_password 'localhost:my_database.fdb' && echo 'SUCCESS' || echo "FAILURE"
+echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:my_database.fdb' && echo 'SUCCESS' || echo "FAILURE"
 
 echo '# Removing the docker container...'
 

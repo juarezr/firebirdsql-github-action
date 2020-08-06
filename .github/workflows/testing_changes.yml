@@ -27,7 +27,7 @@ jobs:
 
       - name: Testing Connection and Query
         run: |
-          echo 'select * from rdb$database;' | isql-fb -u my_user -p my_password 'localhost:my_database.fdb' && echo 'SUCCESS' || echo "FAILURE"
+          echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:my_database.fdb'
 
       - name: Stop Container
         run: |
