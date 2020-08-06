@@ -1,0 +1,39 @@
+# for simplicity we are checking compilation and testing everything on the Ubuntu environment only.
+
+on: [push, pull_request]
+
+name: testing_changes
+
+jobs:
+  ci:
+    name: ci-testing_changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install FirebirdSQL clients
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends firebird3.0-utils libfbclient2
+
+      - name: Setup FirebirdSQL container
+        uses: juarezr/firebirdsql-github-action@v1
+        with:
+          version: 'latest'
+          firebirdsql_database: 'my_database.fdb'
+          firebirdsql_username: 'my_user'
+          firebirdsql_password: 'my_password'
+
+      - name: Testing Connection and Query
+        if: matrix.os == 'linux'
+        run: |
+          echo 'select * from rdb$database;' | isql-fb -u MY_USER -p my_password 'localhost:my_database.fdb' && echo 'SUCCESS' || echo "FAILURE"
+
+      - name: Stop Container
+        if: matrix.os == 'linux'
+        run: |
+          docker rm --volumes --force firebirdsql
+
+# end of file

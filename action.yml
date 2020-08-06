@@ -1,0 +1,54 @@
+name: 'Setup FirebirdSQL'
+description: 'Setup a FirebirdSQL database running in a docker container'
+author: 'juarezr'
+branding:
+  icon: 'database'
+  color: 'blue'
+inputs:
+  # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
+  # and further details on input environment variables
+  version:
+    description: 'Version of firebirdsql to use: 3.0 (latest), 4.0 (beta), 2.5-ss, 2.5-cs (Legacy)'
+    required: false
+    default: 'latest'
+  port:
+    description: 'Port published in the host for connecting in the database. Default 3050.'
+    required: false
+    default: '3050'
+  firebird_database:
+    description: 'Optional name for creating a database with the container'
+    required: false
+    default: ''
+  firebird_user:
+    description: 'Optional name for creating a user that is database owner with the container'
+    required: false
+    default: ''
+  firebird_password:
+    description: 'Optional password for the user created'
+    required: false
+    default: ''
+  isc_password:
+    description: 'Default sysdba user password, if left blank a random 20 character password will be set instead'
+    required: false
+    default: ''
+  timezone:
+    description: 'Server TimeZone. (i.e. America/Sao_Paulo)'
+    required: false
+    default: ''
+  enable_legacy_client_auth:
+    description: 'If this is set to "true" it will allow legacy clients to connect and authenticate.'
+    required: false
+    default: ''
+  enable_wire_crypt:
+    description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3.'
+    required: false
+    default: ''
+  container_name:
+    description: 'The name for tagging the container'
+    required: false
+    default: 'firebirdsql'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+# end of file
