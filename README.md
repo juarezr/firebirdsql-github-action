@@ -12,9 +12,9 @@ steps:
 - uses: juarezr/firebirdsql-github-action@v1.0.0
   with:
     version: 'latest'
-    firebirdsql_database: 'my_database.fdb'
+    firebird_database: 'my_database.fdb'
     firebird_user: 'my_user'
-    firebirdsql_password: 'my_password'
+    firebird_password: 'my_password'
 ```
 
 See [action.yml](action.yml) for more details
