@@ -19,7 +19,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends firebird3.0-utils libfbclient2
 
       - name: Setup FirebirdSQL container
-        uses: juarezr/firebirdsql-github-action@v1
+        uses: juarezr/firebirdsql-github-action@v1.0.0
         with:
           version: 'latest'
           firebirdsql_database: 'my_database.fdb'

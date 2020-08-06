@@ -9,7 +9,7 @@ Example:
 
 ```yaml
 steps:
-- uses: juarezr/firebirdsql-github-action@v1
+- uses: juarezr/firebirdsql-github-action@v1.0.0
   with:
     version: 'latest'
     firebirdsql_database: 'my_database.fdb'
