@@ -13,7 +13,7 @@ steps:
   with:
     version: 'latest'
     firebirdsql_database: 'my_database.fdb'
-    firebirdsql_username: 'my_user'
+    firebird_user: 'my_user'
     firebirdsql_password: 'my_password'
 ```
 
