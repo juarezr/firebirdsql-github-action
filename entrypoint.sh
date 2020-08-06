@@ -36,6 +36,6 @@ fi
 
 docker_run="docker run --detach --publish '$INPUT_PORT:3050' $docker_name $env_list 'jacobalberty/firebird:$INPUT_VERSION'"
 
-echo "docker_run: $docker_run"
+echo "# Creating FirebirdSQL Container: $docker_run"
 
 sh -c "$docker_run"
