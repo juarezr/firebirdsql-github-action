@@ -1,5 +1,9 @@
 #!/bin/sh
 
+set -eu
+
+which isql-fb && echo 'Step 1 Ok: found isql-fb' || (echo 'Failure: missing cmd line app: isql-fb' && exit 99)
+
 export INPUT_FIREBIRD_DATABASE="my_database.fdb"
 
 export INPUT_FIREBIRD_USER="my_user"
