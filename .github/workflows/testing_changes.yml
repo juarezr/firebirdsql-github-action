@@ -32,7 +32,7 @@ jobs:
 
       - name: Test Github Action version ${{ github.event.release.tag_name }} using FirebirdSQL version ${{ matrix.target }}
         if: github.event_name == 'release'
-        uses: juarezr/firebirdsql-github-action@v1.0.0
+        uses: juarezr/firebirdsql-github-action@v1.1.1
         with:
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
