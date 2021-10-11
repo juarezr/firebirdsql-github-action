@@ -6,24 +6,19 @@ export INPUT_FIREBIRD_USER="my_user"
 
 export INPUT_FIREBIRD_PASSWORD="my_password"
 
-export INPUT_ISC_PASSWORD="masterkey"
+for target in latest v4.0 v3.0 2.5-ss 2.5-sc; do
+    export INPUT_VERSION="${target}"
+    echo "# Creating the docker container for FirebirdSQL version: ${INPUT_VERSION}"
+    ./entrypoint.sh
 
-export INPUT_PORT="3050"
+    echo '# Querying the docker database...'
+    echo 'select * from rdb$database;' \
+        | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/firebird/data/my_database.fdb' \
+        && echo "SUCCESS: ${INPUT_VERSION}" \
+        || echo "FAILURE: ${INPUT_VERSION}"
 
-export INPUT_VERSION="latest"
-
-export INPUT_CONTAINER_NAME="firebirdsql"
-
-echo '# Creating the docker database...'
-
-./entrypoint.sh
-
-echo '# Querying the docker database...'
-
-echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:my_database.fdb' && echo 'SUCCESS' || echo "FAILURE"
-
-echo '# Removing the docker container...'
-
-docker rm --volumes --force firebirdsql
+    echo '# Removing the docker container...'
+    docker rm --volumes --force firebirdsql
+done
 
 echo '# Finished!'
