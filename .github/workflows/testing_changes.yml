@@ -21,7 +21,7 @@ jobs:
         if: github.event_name != 'release'
         uses: actions/checkout@v2
 
-      - name: Test Github sources using FirebirdSQL version ${{ matrix.target }}
+      - name: Test Github sources of ${{ github.event_name }} using FirebirdSQL version ${{ matrix.target }}
         if: github.event_name != 'release'
         run: |
           export INPUT_FIREBIRD_DATABASE="my_database.fdb"
@@ -30,7 +30,7 @@ jobs:
           export INPUT_VERSION="${{ matrix.target }}"
           ./entrypoint.sh
 
-      - name: Test Github Action version ${{ github.event.release.tag_name }} using FirebirdSQL version ${{ matrix.target }}
+      - name: Test Github Action  of ${{ github.event_name }} version ${{ github.event.release.tag_name }} using FirebirdSQL version ${{ matrix.target }}
         if: github.event_name == 'release'
         uses: juarezr/firebirdsql-github-action@v1.1.1
         with:
