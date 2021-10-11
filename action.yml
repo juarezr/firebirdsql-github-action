@@ -8,11 +8,11 @@ inputs:
   # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
   # and further details on input environment variables
   version:
-    description: 'Version of firebirdsql to use: 3.0 (latest), 4.0 (beta), 2.5-ss, 2.5-cs (Legacy)'
+    description: 'Version of firebirdsql to use: v4.0 (latest), v3.0, 2.5-ss, 2.5-sc. See also jacobalberty/firebird'
     required: false
     default: 'latest'
   port:
-    description: 'Port published in the host for connecting in the database. Default 3050.'
+    description: 'Port published in the host for connecting in the database. Default: 3050.'
     required: false
     default: '3050'
   firebird_database:
