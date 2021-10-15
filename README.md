@@ -1,8 +1,10 @@
 # firebirdsql-github-action
 
-This [GitHub Action](https://github.com/features/actions) sets up a FirebirdSQL database running on a docker container.
+This [GitHub Action](https://github.com/features/actions) sets up a [Firebird](https://www.firebirdsql.org) database running on a docker container.
 
 ## Usage
+
+See more instructions in [Marketplace](https://github.com/marketplace/actions/setup-firebirdsql).
 
 ### Example
 
@@ -18,7 +20,7 @@ steps:
 
 See [action.yml](action.yml) for more details
 
-### Paremeters
+### Parameters
 
 `version`
 > v4.0 (latest), v3.0 (previous), 2.5-ss (legacy), 2.5-sc (legacy)<br/>
