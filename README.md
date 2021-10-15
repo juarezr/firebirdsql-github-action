@@ -8,7 +8,7 @@ This [GitHub Action](https://github.com/features/actions) sets up a FirebirdSQL 
 
 ```yaml
 steps:
-- uses: juarezr/firebirdsql-github-action@v1.0.0
+- uses: juarezr/firebirdsql-github-action@v1.1.1
   with:
     version: 'latest'
     firebird_database: 'my_database.fdb'
