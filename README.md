@@ -48,6 +48,9 @@ See [action.yml](action.yml) for more details
 `enable_legacy_client_auth`
 > If this is set to "true" it will allow legacy clients to connect and authenticate.
 
+`data_type_compatibility`
+> Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.
+
 `enable_wire_crypt`
 > If this is set to "true" it will allow allow compatibility with Jaybird 3.
 
