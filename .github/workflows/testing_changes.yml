@@ -4,9 +4,62 @@ name: testing_changes
 
 on: 
     push:
+      branches-ignore:
+        - 'main'
+        - 'master'
+        - 'draft/*'
     pull_request:
+      types: [opened, reopened, synchronize]
     release:
-      types: [published]
+      types: [created, edited]
+    workflow_dispatch:
+      inputs:
+        # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
+        # and further details on input environment variables
+        version:
+          description: 'Version of firebirdsql to use: latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc
+          required: false
+          default: 'latest'
+        port:
+          description: 'Port published in the host for connecting in the database. Default: 3050.'
+          required: false
+          default: '3050'
+        firebird_database:
+          description: 'Optional name for creating a database with the container'
+          required: false
+          default: ''
+        firebird_user:
+          description: 'Optional name for creating a user that is database owner with the container'
+          required: false
+          default: ''
+        firebird_password:
+          description: 'Optional password for the user created'
+          required: false
+          default: ''
+        isc_password:
+          description: 'Default sysdba user password, if left blank a random 20 character password will be set instead'
+          required: false
+          default: ''
+        timezone:
+          description: 'Server TimeZone. (i.e. America/Sao_Paulo)'
+          required: false
+          default: ''
+        enable_legacy_client_auth:
+          description: 'If this is set to "true" it will allow legacy clients to connect and authenticate.'
+          required: false
+          default: ''
+        enable_wire_crypt:
+          description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3.'
+          required: false
+          default: ''
+        data_type_compatibility:
+          description: 'Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.'
+          required: false
+          default: ''
+        container_name:
+          description: 'The name for tagging the container'
+          required: false
+          default: 'firebirdsql'
 
 jobs:
   ci:
@@ -14,25 +67,26 @@ jobs:
     strategy:
       matrix:
         target: [latest, v4, v4.0, v3, v3.0, 2.5-ss, 2.5-sc]
-      max-parallel: 1
-    runs-on: ubuntu-latest
+        os: [ "ubuntu-latest" ]
+        #TODO: os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+    runs-on: "${{ matrix.os }}"
+    concurrency: 
+      group: ${{ matrix.os }}
+      cancel-in-progress: true
+
     steps:
-      - name: Checkout sources
+      - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with SHA ${{ github.event.release.tag_name }}
         if: github.event_name != 'release'
-        uses: actions/checkout@v2
+        uses: juarezr/firebirdsql-github-action@${{ github.sha }}
+        with:
+          version: '${{ matrix.target }}'
+          firebird_database: 'my_database.fdb'
+          firebird_user: 'my_user'
+          firebird_password: 'my_password'
 
-      - name: Test Github sources of ${{ github.event_name }} using FirebirdSQL version ${{ matrix.target }}
-        if: github.event_name != 'release'
-        run: |
-          export INPUT_FIREBIRD_DATABASE="my_database.fdb"
-          export INPUT_FIREBIRD_USER="my_user"
-          export INPUT_FIREBIRD_PASSWORD="my_password"
-          export INPUT_VERSION="${{ matrix.target }}"
-          ./entrypoint.sh
-
-      - name: Test Github Action  of ${{ github.event_name }} version ${{ github.event.release.tag_name }} using FirebirdSQL version ${{ matrix.target }}
+      - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with version ${{ github.event.release.tag_name }}
         if: github.event_name == 'release'
-        uses: juarezr/firebirdsql-github-action@v1.1.1
+        uses: juarezr/firebirdsql-github-action@${{ github.github.event.release.tag_name }}
         with:
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
