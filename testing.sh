@@ -10,7 +10,7 @@ export INPUT_FIREBIRD_USER="my_user"
 
 export INPUT_FIREBIRD_PASSWORD="my_password"
 
-for target in latest v4.0 v3.0 2.5-ss 2.5-sc; do
+for target in latest v4 v4.0 v3 v3.0 2.5-ss 2.5-sc; do
     export INPUT_VERSION="${target}"
     echo "# Creating the docker container for FirebirdSQL version: ${INPUT_VERSION}"
     ./entrypoint.sh

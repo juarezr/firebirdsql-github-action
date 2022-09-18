@@ -23,7 +23,7 @@ See [action.yml](action.yml) for more details
 ### Parameters
 
 `version`
-> v4.0 (latest), v3.0 (previous), 2.5-ss (legacy), 2.5-sc (legacy)<br/>
+> latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc<br/>
 > See this [Docker Image](https://hub.docker.com/r/jacobalberty/firebird) for available versions.
   and further details on input environment variables
 

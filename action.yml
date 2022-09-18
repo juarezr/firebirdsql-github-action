@@ -8,7 +8,7 @@ inputs:
   # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
   # and further details on input environment variables
   version:
-    description: 'Version of firebirdsql to use: v4.0 (latest), v3.0, 2.5-ss, 2.5-sc. See also jacobalberty/firebird'
+    description: 'Version of firebirdsql to use: latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc. See: jacobalberty/firebird'
     required: false
     default: 'latest'
   port:
@@ -41,6 +41,10 @@ inputs:
     default: ''
   enable_wire_crypt:
     description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3.'
+    required: false
+    default: ''
+  data_type_compatibility:
+    description: 'Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.'
     required: false
     default: ''
   container_name:

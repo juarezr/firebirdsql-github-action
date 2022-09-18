@@ -13,7 +13,7 @@ jobs:
     name: ci-testing_changes
     strategy:
       matrix:
-        target: [latest, v4.0, v3.0, 2.5-ss, 2.5-sc]
+        target: [latest, v4, v4.0, v3, v3.0, 2.5-ss, 2.5-sc]
       max-parallel: 1
     runs-on: ubuntu-latest
     steps:
