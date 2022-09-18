@@ -30,6 +30,10 @@ if [ -n "$INPUT_ENABLE_WIRE_CRYPT" ]; then
     env_list="$env_list --env 'EnableWireCrypt=$INPUT_ENABLE_WIRE_CRYPT'"
 fi
 
+if [ -n "$INPUT_DATA_TYPE_COMPATIBILITY" ]; then
+    env_list="$env_list --env 'DataTypeCompatibility=$INPUT_DATA_TYPE_COMPATIBILITY'"
+fi
+
 docker_run="docker run --detach  --name '${INPUT_CONTAINER_NAME:-firebirdsql}' --publish '${INPUT_PORT:-3050}:3050' $env_list 'jacobalberty/firebird:${INPUT_VERSION:-latest}'"
 
 echo "# Creating FirebirdSQL Container: $docker_run"
