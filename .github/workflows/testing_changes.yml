@@ -66,14 +66,12 @@ jobs:
   ci:
     name: ci-testing_changes
     strategy:
+      # max-parallel: 1
       matrix:
         target: [latest, v4, v4.0, v3, v3.0, 2.5-ss, 2.5-sc]
         os: [ "ubuntu-latest" ]
         #TODO: os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
     runs-on: "${{ matrix.os }}"
-    concurrency: 
-      group: ${{ matrix.os }}-${{ github.ref }}
-      cancel-in-progress: false
 
     steps:
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with SHA ${{ github.event.release.tag_name }}
@@ -88,7 +86,7 @@ jobs:
 
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with version ${{ github.event.release.tag_name }}
         if: github.event_name == 'release'
-        uses: actions/juarezr/firebirdsql-github-action@main
+        uses: actions/firebirdsql-github-action@main
         with:
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
