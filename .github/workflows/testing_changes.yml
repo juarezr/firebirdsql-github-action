@@ -72,8 +72,8 @@ jobs:
         #TODO: os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
     runs-on: "${{ matrix.os }}"
     concurrency: 
-      group: ${{ matrix.os }}
-      cancel-in-progress: true
+      group: ${{ matrix.os }}-${{ github.ref }}
+      cancel-in-progress: false
 
     steps:
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with SHA ${{ github.event.release.tag_name }}
@@ -88,7 +88,7 @@ jobs:
 
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with version ${{ github.event.release.tag_name }}
         if: github.event_name == 'release'
-        uses: juarezr/firebirdsql-github-action@main
+        uses: actions/juarezr/firebirdsql-github-action@main
         with:
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
