@@ -76,7 +76,7 @@ jobs:
     steps:
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with SHA ${{ github.event.release.tag_name }}
         if: github.event_name != 'release'
-        uses: ./.github/actions/firebirdsql-github-action
+        uses: .
         with:
           ref: ${{ github.sha }}
           version: '${{ matrix.target }}'
@@ -86,7 +86,7 @@ jobs:
 
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with version ${{ github.event.release.tag_name }}
         if: github.event_name == 'release'
-        uses: actions/firebirdsql-github-action@main
+        uses: juarezr/firebirdsql-github-action@v1
         with:
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
