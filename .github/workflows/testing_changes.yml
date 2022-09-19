@@ -76,9 +76,8 @@ jobs:
     steps:
       - name: Testing FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} with SHA ${{ github.event.release.tag_name }}
         if: github.event_name != 'release'
-        uses: .
+        uses: ./
         with:
-          ref: ${{ github.sha }}
           version: '${{ matrix.target }}'
           firebird_database: 'my_database.fdb'
           firebird_user: 'my_user'
