@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 env_list=""
 
 if [ -n "$INPUT_FIREBIRD_DATABASE" ]; then
@@ -39,3 +41,14 @@ docker_run="docker run --detach  --name '${INPUT_CONTAINER_NAME:-firebirdsql}' -
 echo "# Creating FirebirdSQL Container: $docker_run"
 
 sh -c "$docker_run"
+
+echo "Waiting for ${INPUT_CONTAINER_NAME} to get ready..."
+for ii in $(seq 15 -2 1) ; do
+    if  [[ "$( docker container inspect -f '{{.State.Running}}' ${INPUT_CONTAINER_NAME} )" == "true" ]] ; then break ; fi
+    test ${ii} -le 1 && fail "Failed starting to ${INPUT_CONTAINER_NAME}!" 
+    echo -n "."  ; sleep ${ii}
+done
+
+exit 0
+
+## end of script ##
