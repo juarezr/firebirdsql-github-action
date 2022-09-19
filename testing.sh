@@ -23,12 +23,6 @@ remove_it
 for INPUT_VERSION in latest v4 v4.0 v3 v3.0 2.5-ss 2.5-sc; do
     msgs="${INPUT_VERSION}:" ; msg "Starting the docker container for FirebirdSQL server version: ${INPUT_VERSION}:"
     ./entrypoint.sh | ident
-    msg "Checking if ${INPUT_CONTAINER_NAME} is ready..."
-    for ii in $(seq 15 -2 1) ; do
-        if  [[ "$( docker container inspect -f '{{.State.Running}}' ${INPUT_CONTAINER_NAME} )" == "true" ]] ; then break ; fi
-        test ${ii} -le 1 && fail "Failed starting to ${INPUT_CONTAINER_NAME}!" 
-        echo -n "."  ; sleep ${ii}
-    done
     IP_ADDRESS="$( docker container inspect -f '{{.NetworkSettings.IPAddress}}' ${INPUT_CONTAINER_NAME} )"
     msg "Querying the FirebirdSQL server ${INPUT_VERSION} inside the docker container at ${IP_ADDRESS}..."
     echo 'select * from rdb$database;' |
