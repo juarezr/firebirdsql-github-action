@@ -74,7 +74,11 @@ jobs:
     runs-on: "${{ matrix.os }}"
 
     steps:
-      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} triggered by ${{ github.event_name }} at '${{ github.sha }}'
+      - name: Checkout source code on event ${{ github.event_name }} triggered by '${{ github.sha }}'
+        if: github.event_name != 'release'
+        uses: actions/checkout@v3
+
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ github.event_name }} triggered by '${{ github.sha }}'
         if: github.event_name != 'release'
         uses: ./ # Uses an action in the root directory
         with:
