@@ -10,7 +10,7 @@ See more instructions in [Marketplace](https://github.com/marketplace/actions/se
 
 ```yaml
 steps:
-- uses: juarezr/firebirdsql-github-action@v1.2.0
+- uses: juarezr/firebirdsql-github-action@v2
   with:
     version: 'latest'
     firebird_database: 'my_database.fdb'
