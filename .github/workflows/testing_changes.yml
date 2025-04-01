@@ -100,7 +100,7 @@ jobs:
       - name: Testing Connection and Query to ${{ matrix.target }}
         run: |
           for i in {0..120} ; do nc -z localhost 3050 && echo "Up: ${i} secs" && break; sleep 1; done
-          echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/firebird/data/my_database.fdb'
+          echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/var/lib/firebird/data/my_database.fdb'
 
       - name: Stop Container
         run: |
