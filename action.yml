@@ -8,7 +8,7 @@ inputs:
   # See https://hub.docker.com/r/firebirdsql/firebird for supported versions/tags
   # and further details on input environment variables
   version:
-    description: 'Version of firebirdsql to use: latest, 5, 5.02, 5-noble, 5-jammy, 4, 4.05, 3, 3.09. See: firebirdsql/firebird for a complete list of tags.'
+    description: 'Version of firebirdsql to use: latest, 5, 5.0.2, 5-noble, 5-jammy, 4, 4.0.5, 3, 3.0.9. See: firebirdsql/firebird for a complete list of tags.'
     required: false
     default: 'latest'
   port:
