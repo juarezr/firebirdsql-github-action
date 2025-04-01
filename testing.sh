@@ -44,8 +44,9 @@ remove_it; remove_net
 
 docker network create "${INPUT_NETWORK_NAME}" 2> /dev/null || true;
 
-for INPUT_VERSION in latest 5 5.02 5-noble 5-jammy 4 4.05 3 3.09; do
+for INPUT_VERSION in latest 5 5.0.2 5-noble 5-jammy 4 4.0.5 3 3.0.9; do
     MI=0; hr;
+    export INPUT_VERSION;
     msg "Testing the docker container for FirebirdSQL server version: ${INPUT_VERSION}:"
     if ! ./entrypoint.sh | ident; then
         remove_it; remove_net
@@ -64,7 +65,7 @@ for INPUT_VERSION in latest 5 5.02 5-noble 5-jammy 4 4.05 3 3.09; do
     if ! echo 'SELECT * FROM rdb$database;' |
         docker run -i --rm --name "${INPUT_CONTAINER_NAME}-client2" \
             --network "${INPUT_NETWORK_NAME}" --env IP_ADDRESS="${IP_ADDRESS}" \
-            "firebirdsql/firebird:5" \
+            "firebirdsql/firebird:${INPUT_VERSION:-}" \
             sh -c isql -bail -quiet -echo -merge -m2 -z \
             -user "${INPUT_FIREBIRD_USER}" -password "${INPUT_FIREBIRD_PASSWORD}" \
             "${IP_ADDRESS}:${FIREBIRD_DATA}/${INPUT_FIREBIRD_DATABASE}" | ident; 
