@@ -14,53 +14,49 @@ on:
       types: [created, edited]
     workflow_dispatch:
       inputs:
-        # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
+        # See https://hub.docker.com/r/firebirdsql/firebird for supported versions/tags
         # and further details on input environment variables
         # you may only define up to 10 `inputs` for a `workflow_dispatch` event
         version:
-          description: 'Version of firebirdsql to use: latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc'
+          description: 'Version of firebirdsql to use: latest, 5, 5.02, 5-noble, 5-jammy, 4, 4.05, 3, 3.09. See: firebirdsql/firebird for a complete list of tags.'
           required: false
           default: 'latest'
         port:
-          description: 'Port published in the host for connecting in the database. Default: 3050.'
+          description: 'Optional port published in the host for connecting to the database. Default: 3050.'
           required: false
           default: '3050'
         firebird_database:
-          description: 'Optional name for creating a database with the container'
+          description: 'Optional name for creating a database inside the container'
           required: false
           default: ''
         firebird_user:
-          description: 'Optional name for creating a user that is database owner with the container'
+          description: 'Optional name for creating a user that is database owner inside the container'
           required: false
           default: ''
         firebird_password:
           description: 'Optional password for the user created'
           required: false
           default: ''
-        isc_password:
-          description: 'Default sysdba user password, if left blank a random 20 character password will be set instead'
+        firebird_root_password:
+          description: 'Default sysdba user password, if left blank Firebird installer generates a one-off password for SYSDBA instead'
           required: false
           default: ''
         timezone:
           description: 'Server TimeZone. (i.e. America/Sao_Paulo)'
           required: false
           default: ''
-        enable_legacy_client_auth:
-          description: 'If this is set to "true" it will allow legacy clients to connect and authenticate.'
+        firebird_conf:
+          description: 'Comma separated list of settings to be set in `firebird.conf`. E.g.: `ConnectionTimeout=180,DeadlockTimeout=10`. See: https://firebirdsql.org/rlsnotesh/config-fb-conf.html'
           required: false
           default: ''
-        enable_wire_crypt:
-          description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3.'
+        container_name:
+          description: 'The name for tagging the container. Default: firebirdsql'
+          required: false
+          default: 'firebirdsql'
+        network_name:
+          description: 'Optional name of the network for connecting the container'
           required: false
           default: ''
-        data_type_compatibility:
-          description: 'Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.'
-          required: false
-          default: ''
-        # container_name:
-        #   description: 'The name for tagging the container'
-        #   required: false
-        #   default: 'firebirdsql'
 
 jobs:
   ci:
@@ -68,7 +64,7 @@ jobs:
     strategy:
       # max-parallel: 1
       matrix:
-        target: [latest, v4, v4.0, v3, v3.0, 2.5-ss, 2.5-sc]
+        target: [latest, 5, 5.02, 5-noble, 5-jammy, 4, 4.05, 3, 3.09]
         os: [ "ubuntu-latest" ]
         #TODO: os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
     runs-on: "${{ matrix.os }}"

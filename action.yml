@@ -5,52 +5,60 @@ branding:
   icon: 'database'
   color: 'blue'
 inputs:
-  # See https://hub.docker.com/r/jacobalberty/firebird for supported versions
+  # See https://hub.docker.com/r/firebirdsql/firebird for supported versions/tags
   # and further details on input environment variables
   version:
-    description: 'Version of firebirdsql to use: latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc. See: jacobalberty/firebird'
+    description: 'Version of firebirdsql to use: latest, 5, 5.02, 5-noble, 5-jammy, 4, 4.05, 3, 3.09. See: firebirdsql/firebird for a complete list of tags.'
     required: false
     default: 'latest'
   port:
-    description: 'Port published in the host for connecting in the database. Default: 3050.'
+    description: 'Port published in the host for connecting to the database. Default: 3050.'
     required: false
     default: '3050'
   firebird_database:
-    description: 'Optional name for creating a database with the container'
+    description: 'Optional name for creating a database inside the container'
     required: false
     default: ''
   firebird_user:
-    description: 'Optional name for creating a user that is database owner with the container'
+    description: 'Optional name for creating a user that is database owner inside the container'
     required: false
     default: ''
   firebird_password:
     description: 'Optional password for the user created'
     required: false
     default: ''
-  isc_password:
-    description: 'Default sysdba user password, if left blank a random 20 character password will be set instead'
+  firebird_root_password:
+    description: 'Default sysdba user password, if left blank Firebird installer generates a one-off password for SYSDBA instead'
     required: false
     default: ''
   timezone:
     description: 'Server TimeZone. (i.e. America/Sao_Paulo)'
     required: false
     default: ''
+  container_name:
+    description: 'The name for tagging the container. Default: firebirdsql'
+    required: false
+    default: 'firebirdsql'
+  network_name:
+    description: 'Optional name of the network for connecting the container'
+    required: false
+    default: ''
+  firebird_conf:
+    description: 'Comma separated list of settings to be set in `firebird.conf`. E.g.: `ConnectionTimeout=180,DeadlockTimeout=10`. See: https://firebirdsql.org/rlsnotesh/config-fb-conf.html'
+    required: false
+    default: ''
   enable_legacy_client_auth:
-    description: 'If this is set to "true" it will allow legacy clients to connect and authenticate.'
+    description: 'If this is set to "true" it will allow legacy clients to connect and authenticate. Not recommended. Deprecated.'
     required: false
     default: ''
   enable_wire_crypt:
-    description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3.'
+    description: 'If this is set to "true" it will allow allow compatibility with Jaybird 3. Not recommended. Deprecated.'
     required: false
     default: ''
   data_type_compatibility:
-    description: 'Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.'
+    description: 'Enable datatype compatibility for clients with previews versions: `3.0` and `4.0`. Deprecated.'
     required: false
     default: ''
-  container_name:
-    description: 'The name for tagging the container'
-    required: false
-    default: 'firebirdsql'
 runs:
   using: 'docker'
   image: 'Dockerfile'

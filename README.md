@@ -23,12 +23,12 @@ See [action.yml](action.yml) for more details
 ### Parameters
 
 `version`
-> latest, v4, v4.0, v4.0.2, v3, v3.0, v3.0.10, 2.5-ss, 2.5-sc<br/>
-> See this [Docker Image](https://hub.docker.com/r/jacobalberty/firebird) for available versions.
-  and further details on input environment variables
+> latest, 5, 5.02, 5-noble, 5-jammy, 4, 4.05, 3, 3.09, ...<br/>
+> See the FirebirdSQL [Docker Image](https://hub.docker.com/r/firebirdsql/firebird) for available versions.
+  and further details on input environment variables. Default: latest
 
 `port`
-> Port published in the host for connecting in the database. Default 3050.
+> Optional port published in the host for connecting to the database. Default 3050.
 
 `firebird_database`
 > Optional name for creating a database with the container
@@ -39,11 +39,25 @@ See [action.yml](action.yml) for more details
 `firebird_password`
 > Optional password for the user created
 
-`isc_password`
-> Default sysdba user password, if left blank a random 20 character password will be set instead.
+`firebird_root_password`
+> Default sysdba user password, if left blank Firebird installer generates a one-off password for SYSDBA instead.
 
 `timezone`
-> Optional Server TimeZone. (i.e. America/Sao_Paulo)
+> Optional Server TimeZone. (e.g.: America/Sao_Paulo)
+
+`firebird_conf`
+> Comma separated list of settings to be set in `firebird.conf`.<br/>
+> E.g.: `ConnectionTimeout=180,DeadlockTimeout=10`.<br/>
+> Spaces may break the container creation. To avoid, try to use single quotes for values if needed.<br/>
+> See: <https://firebirdsql.org/rlsnotesh/config-fb-conf.html>
+
+`container_name`
+> Optional name for tagging the container. Default: `firebirdsql`.
+
+`network_name`
+> Optional name of the network for connecting the container
+
+#### Deprecated v1 parameters
 
 `enable_legacy_client_auth`
 > If this is set to "true" it will allow legacy clients to connect and authenticate.
@@ -54,8 +68,8 @@ See [action.yml](action.yml) for more details
 `enable_wire_crypt`
 > If this is set to "true" it will allow allow compatibility with Jaybird 3.
 
-`container_name`
-> The name for tagging the container
+`isc_password`
+> `isc_password` was removed. Use `firebird_root_password` instead.
 
 ## Misc
 
