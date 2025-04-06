@@ -23,7 +23,7 @@ See [action.yml](action.yml) for more details
 ### Parameters
 
 `version`
-> latest, 5, 5.0.2, 5-noble, 5-jammy, 4, 4.0.5, 3, 3.0.9, ...<br/>
+> latest, 5, 5.0.2, 5-noble, 5-jammy, 4, 4.0.5, 3, 3.0.12, ...<br/>
 > See the FirebirdSQL [Docker Image](https://hub.docker.com/r/firebirdsql/firebird) for available versions.
   and further details on input environment variables. Default: latest
 

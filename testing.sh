@@ -44,7 +44,7 @@ remove_it; remove_net
 
 docker network create "${INPUT_NETWORK_NAME}" 2> /dev/null || true;
 
-for INPUT_VERSION in latest 5 5.0.2 5-noble 5-jammy 4 4.0.5 3 3.0.9; do
+for INPUT_VERSION in latest 5 5.0.2 5-noble 5-jammy 4 4.0.5 3 3.0.12; do
     MI=0; hr;
     export INPUT_VERSION;
     msg "Testing the docker container for FirebirdSQL server version: ${INPUT_VERSION}:"
