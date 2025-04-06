@@ -2,7 +2,9 @@
 
 #region Container Variables ------------------------------------------------------------
 
-set -eu -o pipefail
+# shellcheck disable=SC3040
+set -o pipefail || true
+set -eu
 
 echo '## Local testing of docker container versions ##'
 
@@ -62,6 +64,7 @@ for INPUT_VERSION in latest 5 5.0.2 5-noble 5-jammy 4 4.0.5 3 3.0.12; do
     fi
     msg "Querying the FirebirdSQL server inside the docker container at [${IP_ADDRESS}]..."
 
+    # shellcheck disable=SC2016
     if ! echo 'SELECT * FROM rdb$database;' |
         docker run -i --rm --name "${INPUT_CONTAINER_NAME}-client2" \
             --network "${INPUT_NETWORK_NAME}" --env IP_ADDRESS="${IP_ADDRESS}" \

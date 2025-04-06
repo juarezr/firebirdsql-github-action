@@ -62,6 +62,7 @@ fi
 
 echo "# Creating the FirebirdSQL Container: docker run --detach --name ${INPUT_CONTAINER_NAME:-firebirdsql} --publish ${INPUT_PORT:-3050}:3050 ${env_list} firebirdsql/firebird:${INPUT_VERSION:-latest}"
 
+# shellcheck disable=SC2086
 if ! docker run --detach --name "${INPUT_CONTAINER_NAME:-firebirdsql}" --publish "${INPUT_PORT:-3050}:3050" ${network_arg} ${env_list} "firebirdsql/firebird:${INPUT_VERSION:-latest}" ; then
     echo "## Failed to create the FirebirdSQL container! ##"
     exit 11
