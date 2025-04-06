@@ -18,9 +18,28 @@ steps:
     firebird_password: 'my_password'
 ```
 
-See [action.yml](action.yml) for more details
+See the FirebirdSQL [Docker Image](https://hub.docker.com/r/firebirdsql/firebird) for available tags/versions and also for more details on the [parameters](#parameters) that you can use.
 
-### Parameters
+### Connecting
+
+For connecting your application to the FirebirdSQL database in your application, you may include the host IP address/DNS name and the path to the database as below:
+
+- `localhost:my_database.fdb` to connect to the server running in the current job.
+- `localhost:/var/lib/firebird/data/my_database.fdb` if you need to specify the full path.
+- `<container name>:my_database.fdb` as alternative or if you have more than 1 container running at same time in the current job.
+
+Example:
+
+```sh
+echo 'SELECT * FROM rdb$database;' | \ 
+  isql -bail -quiet -echo -merge -m2 -z \
+  -user 'my_user' -password 'my_password' \
+  localhost:/var/lib/firebird/data/my_database.fdb
+```
+
+## Parameters
+
+<!-- markdownlint-disable MD033 -->
 
 `version`
 > latest, 5, 5.0.2, 5-noble, 5-jammy, 4, 4.0.5, 3, 3.0.12, ...<br/>
@@ -49,7 +68,7 @@ See [action.yml](action.yml) for more details
 > Comma separated list of settings to be set in `firebird.conf`.<br/>
 > E.g.: `ConnectionTimeout=180,DeadlockTimeout=10`.<br/>
 > Spaces may break the container creation. To avoid, try to use single quotes for values if needed.<br/>
-> See: <https://firebirdsql.org/rlsnotesh/config-fb-conf.html>
+> Check the [firebird.conf documentation](https://firebirdsql.org/rlsnotesh/config-fb-conf.html) for details on the settings you can configure.
 
 `container_name`
 > Optional name for tagging the container. Default: `firebirdsql`.
@@ -57,13 +76,13 @@ See [action.yml](action.yml) for more details
 `network_name`
 > Optional name of the network for connecting the container
 
-#### Deprecated v1 parameters
+### Deprecated v1 parameters
 
 `enable_legacy_client_auth`
 > If this is set to "true" it will allow legacy clients to connect and authenticate.
 
 `data_type_compatibility`
-> Enable datatype compatibility for clients with previews versions: `3.0` and `2.5`.
+> Enable datatype compatibility for clients with previews versions: `4.x` and `3.x`.
 
 `enable_wire_crypt`
 > If this is set to "true" it will allow allow compatibility with Jaybird 3.
@@ -71,11 +90,16 @@ See [action.yml](action.yml) for more details
 `isc_password`
 > `isc_password` was removed. Use `firebird_root_password` instead.
 
+### Notes
+
+> [!WARNING]  
+> if you use the `network_name` parameter above, the container may not answer on any of the `localhost`, `127.0.0.1`, or `0.0.0.0` addresses . Make sure you pass the IP address of the container on the added network.
+
 ## Misc
 
 ### Status
 
-![testing_changes](https://github.com/juarezr/firebirdsql-github-action/workflows/testing_changes/badge.svg)
+[![testing_changes](https://github.com/juarezr/firebirdsql-github-action/actions/workflows/testing_changes.yml/badge.svg)](https://github.com/juarezr/firebirdsql-github-action/actions/workflows/testing_changes.yml)
 
 ### License
 
