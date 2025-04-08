@@ -72,8 +72,17 @@ jobs:
         if: github.event_name != 'release'
         uses: actions/checkout@v3
 
-      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ github.event_name }} triggered by '${{ github.sha }}'
-        if: github.event_name != 'release'
+      - name: Report Workflow Information
+        id: workflow_report
+        uses: ./.github/actions/workflow-info
+        with:
+          title: '${{ github.ref_name }}'
+          parameters: '${{ toJson(inputs) }}'
+          content: |
+            - Ref: ${{ github.head_ref }}
+
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ matrix.os }} triggered by '${{ github.event_name }}'
+        if: github.event_name != 'release' && matrix.os == 'ubuntu-latest'
         uses: ./ # Uses an action in the root directory
         with:
           version: '${{ matrix.target }}'
