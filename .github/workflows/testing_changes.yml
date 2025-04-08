@@ -123,14 +123,17 @@ jobs:
         shell: bash
         run: |
           docker --help
-          pwd
           command -v docker || true
           command -v dockercli || true
           command -v DockerCli || true
           command -v DockerCli.exe || true
-          ls -l "C:\Program Files\Docker\Docker"
-          cd "C:\Program Files\Docker\Docker"
-          ./DockerCli.exe -SwitchLinuxEngine
+          pwd
+          ls -l "/c/"
+          ls -l "/c/Program Files"
+          ls -l "/c/Program Files/Docker"
+          ls -l "/c/Program Files/Docker/Docker"
+          # cd "C:\Program Files\Docker\Docker"
+          DockerCli.exe -SwitchLinuxEngine
 
       - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
         if: github.event_name != 'release' && matrix.os != 'ubuntu-latest'
