@@ -118,6 +118,18 @@ jobs:
           firebird_user: 'my_user'
           firebird_password: 'my_password'
 
+      - name: Switch to Linux Containers on '${{ matrix.os }}'
+        if: github.event_name != 'release' && matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          docker --help
+          command -v dockercli || true
+          command -v DockerCli || true
+          command -v DockerCli.exe || true
+          ls -l "C:\Program Files\Docker\Docker"
+          cd "C:\Program Files\Docker\Docker"
+          ./DockerCli.exe -SwitchLinuxEngine
+
       - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
         if: github.event_name != 'release' && matrix.os != 'ubuntu-latest'
         shell: bash
