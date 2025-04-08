@@ -118,7 +118,7 @@ jobs:
           firebird_user: 'my_user'
           firebird_password: 'my_password'
 
-      - name: Testing release with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
         if: github.event_name != 'release' && matrix.os != 'ubuntu-latest'
         shell: bash
         run: |
