@@ -94,6 +94,21 @@ jobs:
           content: |
             - Ref: ${{ github.head_ref }}
 
+      - name: Setup docker (missing on MacOS) on ${{ matrix.os }}
+        if: runner.os == 'macos'
+        uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
+
+      - name: Report Docker Information on ${{ matrix.os }}
+        shell: bash
+        run: |
+          echo "::group::Step Report"
+          printf '## Docker Version on ${{ matrix.os }}\n\n' >> "${GITHUB_STEP_SUMMARY}";
+          docker --version >> "${GITHUB_STEP_SUMMARY}";
+          printf '## Docker Configuration on ${{ matrix.os }}\n\n' >> "${GITHUB_STEP_SUMMARY}";
+          docker version >> "${GITHUB_STEP_SUMMARY}";
+          echo "::endgroup::"
+
       - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ matrix.os }} triggered by '${{ github.event_name }}'
         if: github.event_name != 'release' && matrix.os == 'ubuntu-latest'
         uses: ./ # Uses an action in the root directory
