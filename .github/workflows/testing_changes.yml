@@ -129,11 +129,8 @@ jobs:
           command -v DockerCli.exe || true
           pwd
           ls -l "/c/"
-          ls -l "/c/Program Files"
-          ls -l "/c/Program Files/Docker"
-          ls -l "/c/Program Files/Docker/Docker"
-          # cd "C:\Program Files\Docker\Docker"
-          DockerCli.exe -SwitchLinuxEngine
+          ls -l /c/Windows/system32/Do*
+          /c/Windows/system32/DockerCli.exe -SwitchLinuxEngine
 
       - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
         if: github.event_name != 'release' && matrix.os != 'ubuntu-latest'
