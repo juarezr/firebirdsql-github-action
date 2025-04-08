@@ -123,6 +123,8 @@ jobs:
         shell: bash
         run: |
           docker --help
+          pwd
+          command -v docker || true
           command -v dockercli || true
           command -v DockerCli || true
           command -v DockerCli.exe || true
