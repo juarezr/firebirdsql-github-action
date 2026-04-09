@@ -50,6 +50,9 @@ echo 'SELECT * FROM rdb$database;' | \
 `port`
 > Optional port published in the host for connecting to the database. Default 3050.
 
+`event_port`
+> Optional port for Firebird database events (`RemoteAuxPort`). If set, configures `RemoteAuxPort` in `firebird.conf` and publishes the port on the host. This is required when using Firebird event listeners from outside the container.
+
 `firebird_database`
 > Optional name for creating a database with the container
 
