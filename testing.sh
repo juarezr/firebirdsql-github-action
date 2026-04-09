@@ -83,6 +83,61 @@ done
 
 hr; remove_net
 
+msg '# Testing mapped volumes support ##'
+
+VOLUME_HOST_DIR='/tmp/firebird-test-data'
+VOLUME_CONTAINER_DIR='/var/lib/firebird/data'
+
+sudo mkdir -p "${VOLUME_HOST_DIR}"
+sudo chmod 777 "${VOLUME_HOST_DIR}"
+
+export INPUT_VOLUMES="${VOLUME_HOST_DIR}:${VOLUME_CONTAINER_DIR}"
+export INPUT_NETWORK_NAME='fbtest-vol'
+docker network create "${INPUT_NETWORK_NAME}" 2> /dev/null || true;
+
+for INPUT_VERSION in latest 5 4 3; do
+    MI=0; hr;
+    export INPUT_VERSION;
+    msg "Testing mapped volume for FirebirdSQL server version: ${INPUT_VERSION}:"
+    if ! ./entrypoint.sh | ident; then
+        remove_it; remove_net
+        fail "error creating the container with volumes and version: ${INPUT_VERSION:-}";
+    fi
+    IP_ADDRESS="$( docker container inspect -f '{{.NetworkSettings.IPAddress}}' "${INPUT_CONTAINER_NAME}" )"
+    if [ -z "${IP_ADDRESS:-}" ]; then
+        IP_ADDRESS="$( docker container inspect -f "{{.NetworkSettings.Networks.${INPUT_NETWORK_NAME}.IPAddress}}" "${INPUT_CONTAINER_NAME}" )"
+    fi
+    if [ -z "${IP_ADDRESS:-}" ]; then
+        remove_it; remove_net
+        fail "unable to find the IP address of container (with volumes) version ${INPUT_VERSION:-} in the network ${INPUT_NETWORK_NAME:-}";
+    fi
+    msg "Querying the FirebirdSQL server (with volume) inside the docker container at [${IP_ADDRESS}]..."
+
+    # shellcheck disable=SC2016
+    if ! echo 'SELECT * FROM rdb$database;' |
+        docker run -i --rm --name "${INPUT_CONTAINER_NAME}-client3" \
+            --network "${INPUT_NETWORK_NAME}" --env IP_ADDRESS="${IP_ADDRESS}" \
+            "firebirdsql/firebird:${INPUT_VERSION:-}" \
+            sh -c isql -bail -quiet -echo -merge -m2 -z \
+            -user "${INPUT_FIREBIRD_USER}" -password "${INPUT_FIREBIRD_PASSWORD}" \
+            "${IP_ADDRESS}:${VOLUME_CONTAINER_DIR}/${INPUT_FIREBIRD_DATABASE}" | ident;
+        then
+            hr; remove_it; remove_net
+            fail "error connecting (with volumes) with version: ${INPUT_VERSION:-}";
+        fi
+
+    msg "Verifying database file exists on host at [${VOLUME_HOST_DIR}/${INPUT_FIREBIRD_DATABASE}]..."
+    if [ ! -f "${VOLUME_HOST_DIR}/${INPUT_FIREBIRD_DATABASE}" ]; then
+        hr; remove_it; remove_net
+        fail "database file not found on host volume for version: ${INPUT_VERSION:-}";
+    fi
+
+    msg "Removing the FirebirdSQL server docker container (with volumes)...\n\n"
+    remove_it
+done
+
+hr; remove_net
+
 msg '# Successfully Finished ##'
 exit 0
 

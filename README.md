@@ -16,6 +16,7 @@ steps:
     firebird_database: 'my_database.fdb'
     firebird_user: 'my_user'
     firebird_password: 'my_password'
+    volumes: '/tmp/firebird-data:/var/lib/firebird/data'
 ```
 
 See the FirebirdSQL [Docker Image](https://hub.docker.com/r/firebirdsql/firebird) for available tags/versions and also for more details on the [parameters](#parameters) that you can use.
@@ -75,6 +76,11 @@ echo 'SELECT * FROM rdb$database;' | \
 
 `network_name`
 > Optional name of the network for connecting the container
+
+`volumes`
+> Optional list of volumes to mount in the container. One volume per line in `host_path:container_path` format.<br/>
+> E.g.: `/tmp/firebird:/var/lib/firebird/data`.<br/>
+> This allows accessing database files directly from the host filesystem.
 
 ### Deprecated v1 parameters
 
