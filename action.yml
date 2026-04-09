@@ -15,6 +15,10 @@ inputs:
     description: 'Port published in the host for connecting to the database. Default: 3050.'
     required: false
     default: '3050'
+  event_port:
+    description: 'Optional port for Firebird events (RemoteAuxPort). If set, configures RemoteAuxPort in firebird.conf and publishes the port. Default: empty (disabled).'
+    required: false
+    default: ''
   firebird_database:
     description: 'Optional name for creating a database inside the container'
     required: false
