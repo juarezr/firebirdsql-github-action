@@ -63,10 +63,24 @@ if [ -n "${INPUT_NETWORK_NAME:-}" ]; then
     network_arg="--network ${INPUT_NETWORK_NAME}"
 fi
 
-echo "# Creating the FirebirdSQL Container: docker run --detach --name ${INPUT_CONTAINER_NAME:-firebirdsql} --publish ${INPUT_PORT:-3050}:3050 ${env_list} firebirdsql/firebird:${INPUT_VERSION:-latest}"
+volumes_arg=''
+if [ -n "${INPUT_VOLUMES:-}" ]; then
+    OLD_IFS="${IFS}"; IFS='
+'
+    for vol in ${INPUT_VOLUMES}; do
+        vol=$(printf '%s' "${vol}" | tr -d '\r')
+        if [ -n "${vol}" ]; then
+            printf '# Mounting volume: %s\n' "${vol}"
+            volumes_arg="${volumes_arg} --volume ${vol}"
+        fi
+    done
+    IFS="${OLD_IFS}"
+fi
+
+echo "# Creating the FirebirdSQL Container: docker run --detach --name ${INPUT_CONTAINER_NAME:-firebirdsql} --publish ${INPUT_PORT:-3050}:3050 ${env_list} ${volumes_arg} firebirdsql/firebird:${INPUT_VERSION:-latest}"
 
 # shellcheck disable=SC2086
-if ! docker run --detach --name "${INPUT_CONTAINER_NAME:-firebirdsql}" --publish "${INPUT_PORT:-3050}:3050" ${network_arg} ${env_list} "firebirdsql/firebird:${INPUT_VERSION:-latest}" ; then
+if ! docker run --detach --name "${INPUT_CONTAINER_NAME:-firebirdsql}" --publish "${INPUT_PORT:-3050}:3050" ${network_arg} ${env_list} ${volumes_arg} "firebirdsql/firebird:${INPUT_VERSION:-latest}" ; then
     echo "## Failed to create the FirebirdSQL container! ##"
     exit 11
 fi

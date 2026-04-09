@@ -43,6 +43,10 @@ inputs:
     description: 'Optional name of the network for connecting the container'
     required: false
     default: ''
+  volumes:
+    description: 'Optional list of volumes to mount in the container. One volume per line in `host_path:container_path` format. E.g.: `/tmp/firebird:/var/lib/firebird/data`'
+    required: false
+    default: ''
   firebird_conf:
     description: 'Comma separated list of settings to be set in `firebird.conf`. E.g.: `ConnectionTimeout=180,DeadlockTimeout=10`. See: https://firebirdsql.org/rlsnotesh/config-fb-conf.html'
     required: false
