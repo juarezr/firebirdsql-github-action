@@ -106,4 +106,62 @@ jobs:
         run: |
           docker rm --volumes --force firebirdsql
 
+  ci-volumes:
+    name: ci-testing_volumes
+    strategy:
+      matrix:
+        target: [latest, 5, 4, 3]
+        os: [ "ubuntu-latest" ]
+    runs-on: "${{ matrix.os }}"
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source code on event ${{ github.event_name }} triggered by '${{ github.sha }}'
+        if: github.event_name != 'release'
+        uses: actions/checkout@v3
+
+      - name: Create host data directory for volume mount
+        run: |
+          sudo mkdir -p /tmp/firebird-data
+          sudo chmod 777 /tmp/firebird-data
+
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} and mapped volume on ${{ github.event_name }}
+        if: github.event_name != 'release'
+        uses: ./ # Uses an action in the root directory
+        with:
+          version: '${{ matrix.target }}'
+          firebird_database: 'my_database.fdb'
+          firebird_user: 'my_user'
+          firebird_password: 'my_password'
+          volumes: '/tmp/firebird-data:/var/lib/firebird/data'
+
+      - name: Testing release with FirebirdSQL version ${{ matrix.target }} and mapped volume triggered by version '${{ github.event.release.tag_name }}'
+        if: github.event_name == 'release'
+        uses: juarezr/firebirdsql-github-action@master
+        with:
+          version: '${{ matrix.target }}'
+          firebird_database: 'my_database.fdb'
+          firebird_user: 'my_user'
+          firebird_password: 'my_password'
+          volumes: '/tmp/firebird-data:/var/lib/firebird/data'
+
+      - name: Install FirebirdSQL clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends firebird3.0-utils libfbclient2
+
+      - name: Testing Connection and Query to ${{ matrix.target }} with mapped volume
+        run: |
+          for i in {0..120} ; do nc -z localhost 3050 && echo "Up: ${i} secs" && break; sleep 1; done
+          echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/var/lib/firebird/data/my_database.fdb'
+
+      - name: Verify database file exists on host volume
+        run: |
+          test -f /tmp/firebird-data/my_database.fdb && echo "Database file found on host volume." || (echo "Database file NOT found on host volume!" && exit 1)
+
+      - name: Stop Container
+        run: |
+          docker rm --volumes --force firebirdsql
+
 # end of file
