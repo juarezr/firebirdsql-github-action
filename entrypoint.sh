@@ -77,10 +77,17 @@ if [ -n "${INPUT_VOLUMES:-}" ]; then
     IFS="${OLD_IFS}"
 fi
 
-echo "# Creating the FirebirdSQL Container: docker run --detach --name ${INPUT_CONTAINER_NAME:-firebirdsql} --publish ${INPUT_PORT:-3050}:3050 ${env_list} ${volumes_arg} firebirdsql/firebird:${INPUT_VERSION:-latest}"
+event_port_arg=''
+if [ -n "${INPUT_EVENT_PORT:-}" ]; then
+    printf '# Publishing event port (RemoteAuxPort): %s\n' "${INPUT_EVENT_PORT}"
+    env_list="${env_list} --env FIREBIRD_CONF_RemoteAuxPort=${INPUT_EVENT_PORT}"
+    event_port_arg="--publish ${INPUT_EVENT_PORT}:${INPUT_EVENT_PORT}"
+fi
+
+echo "# Creating the FirebirdSQL Container: docker run --detach --name ${INPUT_CONTAINER_NAME:-firebirdsql} --publish ${INPUT_PORT:-3050}:3050 ${env_list} ${event_port_arg} ${volumes_arg} firebirdsql/firebird:${INPUT_VERSION:-latest}"
 
 # shellcheck disable=SC2086
-if ! docker run --detach --name "${INPUT_CONTAINER_NAME:-firebirdsql}" --publish "${INPUT_PORT:-3050}:3050" ${network_arg} ${env_list} ${volumes_arg} "firebirdsql/firebird:${INPUT_VERSION:-latest}" ; then
+if ! docker run --detach --name "${INPUT_CONTAINER_NAME:-firebirdsql}" --publish "${INPUT_PORT:-3050}:3050" ${network_arg} ${env_list} ${event_port_arg} ${volumes_arg} "firebirdsql/firebird:${INPUT_VERSION:-latest}" ; then
     echo "## Failed to create the FirebirdSQL container! ##"
     exit 11
 fi
