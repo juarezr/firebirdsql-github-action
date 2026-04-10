@@ -4,12 +4,10 @@ name: testing_changes
 
 on: 
     push:
-      branches-ignore:
-        - 'main'
-        - 'master'
-        - 'draft/*'
+      branches: [ "master" ]
     pull_request:
-      types: [opened, reopened, synchronize]
+      branches: [ "master" ]
+      types: [opened, reopened, synchronize, ready_for_review]
     release:
       types: [created, edited]
     workflow_dispatch:
@@ -62,29 +60,20 @@ jobs:
   ci:
     name: ci-testing_changes
     strategy:
-      # max-parallel: 1
+      fail-fast: false
       matrix:
-        target: [latest, 5, 5.0.2, 5-noble, 5-jammy, 4, 4.0.5, 3, 3.0.12]
-        os: [ "ubuntu-latest" ]
-        #TODO: os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest", "macos-13" ]
+        # ubuntu-latest:  https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+        # macos-latest:   https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+        # macos-13:       https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+        # windows-latest: https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md
+        target: [ 'latest', '5', '5.0.2', '5-noble', '5-jammy', '4', '4.0.5', '3', '3.0.12' ]
+        # https://github.com/FirebirdSQL/firebird-docker
     runs-on: "${{ matrix.os }}"
 
     steps:
-      - name: Checkout source code on event ${{ github.event_name }} triggered by '${{ github.sha }}'
-        if: github.event_name != 'release'
-        uses: actions/checkout@v3
-
-      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ github.event_name }} triggered by '${{ github.sha }}'
-        if: github.event_name != 'release'
-        uses: ./ # Uses an action in the root directory
-        with:
-          version: '${{ matrix.target }}'
-          firebird_database: 'my_database.fdb'
-          firebird_user: 'my_user'
-          firebird_password: 'my_password'
-
       - name: Testing release with FirebirdSQL version ${{ matrix.target }} triggered by version '${{ github.event.release.tag_name }}'
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && matrix.os == 'ubuntu-latest'
         uses: juarezr/firebirdsql-github-action@master
         with:
           version: '${{ matrix.target }}'
@@ -92,15 +81,102 @@ jobs:
           firebird_user: 'my_user'
           firebird_password: 'my_password'
 
+      - name: Checkout source code on event ${{ github.event_name }} triggered by '${{ github.sha }}'
+        if: github.event_name != 'release'
+        uses: actions/checkout@v3
+
+      - name: Report Workflow Information
+        id: workflow_report
+        uses: ./.github/actions/workflow-info
+        with:
+          title: '${{ github.ref_name }}'
+          parameters: '${{ toJson(inputs) }}'
+          content: |
+            - Ref: ${{ github.head_ref }}
+
+      - name: Setup docker (missing on MacOS) on ${{ matrix.os }}
+        if: runner.os == 'macos'
+        uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
+
+      - name: Report Docker Information on ${{ matrix.os }}
+        shell: bash
+        run: |
+          echo "::group::Step Report"
+          printf '## Docker Version on ${{ matrix.os }}\n\n' >> "${GITHUB_STEP_SUMMARY}";
+          docker --version >> "${GITHUB_STEP_SUMMARY}";
+          printf '## Docker Configuration on ${{ matrix.os }}\n\n' >> "${GITHUB_STEP_SUMMARY}";
+          docker version >> "${GITHUB_STEP_SUMMARY}";
+          echo "::endgroup::"
+
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on ${{ matrix.os }} triggered by '${{ github.event_name }}'
+        if: github.event_name != 'release' && matrix.os == 'ubuntu-latest'
+        uses: ./ # Uses an action in the root directory
+        with:
+          version: '${{ matrix.target }}'
+          firebird_database: 'my_database.fdb'
+          firebird_user: 'my_user'
+          firebird_password: 'my_password'
+
+      - name: Switch to Linux Containers on '${{ matrix.os }}'
+        if: github.event_name != 'release' && matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          docker --help
+          command -v docker || true
+          command -v dockercli || true
+          command -v DockerCli || true
+          command -v DockerCli.exe || true
+          pwd
+          ls -l "/c/"
+          ls -l /c/Windows/system32/Do*
+          /c/Windows/system32/DockerCli.exe -SwitchLinuxEngine
+
+      - name: Testing changes with FirebirdSQL version ${{ matrix.target }} on '${{ matrix.os }}'
+        if: github.event_name != 'release' && matrix.os != 'ubuntu-latest'
+        shell: bash
+        run: |
+          export INPUT_CONTAINER_NAME='firebirdsql'
+          export INPUT_FIREBIRD_DATABASE='localhost:/var/lib/firebird/data/my_database.fdb'
+          export INPUT_FIREBIRD_USER='my_user'
+          export INPUT_FIREBIRD_PASSWORD='my_password'
+          export INPUT_FIREBIRD_CONF='ConnectionTimeout=180,DeadlockTimeout=10'
+          echo "::group::Checkout Report"
+          echo "PWD: ${PWD:-}"
+          ls --escape --dereference-command-line --human-readable --time-style=iso --no-group --color=auto -la
+          echo "::endgroup::"
+          bash entrypoint.sh
+
       - name: Install FirebirdSQL clients
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends firebird3.0-utils libfbclient2
 
-      - name: Testing Connection and Query to ${{ matrix.target }}
+      - name: Wait for Firebird version ${{ matrix.target }} to be available  on ${{ matrix.os }}
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
         run: |
           for i in {0..120} ; do nc -z localhost 3050 && echo "Up: ${i} secs" && break; sleep 1; done
-          echo 'select * from rdb$database;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/var/lib/firebird/data/my_database.fdb'
+
+      - name: Testing Connection and Query with FirebirdSQL version ${{ matrix.target }}
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          echo 'SELECT * FROM rdb$roles;' | isql-fb -bail -quiet -z -user my_user -password my_password 'localhost:/var/lib/firebird/data/my_database.fdb'
+
+      - name: Install Python driver
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip wheel
+          python3 -m pip install firebird-driver
+          python3 -m pip install rich typer
+
+      - name: Testing Connection and Query with FirebirdSQL version ${{ matrix.target }} with python
+        shell: bash
+        run: |
+          python3 test_connection.py --user my_user --password my_password --host localhost /var/lib/firebird/data/my_database.fdb
 
       - name: Stop Container
         run: |
