@@ -112,13 +112,20 @@ jobs:
           while ! colima status 2>/dev/null | grep -q "running"; do sleep 2; done
         timeout-minutes: 15
 
-      # Windows runners use Windows containers by default; switch to Linux containers
+      # Windows runners use Windows containers by default; switch to Linux containers.
+      # DockerCli.exe is only present when Docker Desktop is installed (not on GitHub-hosted runners
+      # which ship Docker Engine/Moby already configured for Linux containers), so guard the call.
       - name: Switch to Linux containers on Windows
         if: github.event_name != 'release' && runner.os == 'Windows'
         shell: pwsh
         run: |
-          & 'C:\Program Files\Docker\Docker\DockerCli.exe' -SwitchLinuxEngine
-          Start-Sleep -Seconds 10
+          $dockerCli = 'C:\Program Files\Docker\Docker\DockerCli.exe'
+          if (Test-Path $dockerCli) {
+            & $dockerCli -SwitchLinuxEngine
+            Start-Sleep -Seconds 10
+          } else {
+            Write-Host "DockerCli.exe not found – Docker Engine is already configured for Linux containers."
+          }
 
       - name: Report Docker version on ${{ matrix.os }}
         if: github.event_name != 'release'
