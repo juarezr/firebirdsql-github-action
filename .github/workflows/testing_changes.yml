@@ -103,21 +103,12 @@ jobs:
             - Firebird version: ${{ matrix.target }}
             - Ref: ${{ github.head_ref }}
 
-      # macOS runners do not have Docker pre-installed; use colima with QEMU (stable on both ARM64 and x86_64)
-      # Note: the VZ driver has been observed to fail fatally on GitHub-hosted macOS runners, so QEMU is used directly.
+      # macOS runners do not have Docker pre-installed; use the official docker/setup-docker-action (Lima VM).
       - name: Setup Docker on macOS (${{ matrix.os }})
         if: github.event_name != 'release' && runner.os == 'macOS'
-        run: |
-          brew install colima docker
-          # Use QEMU driver directly; it is stable on both ARM64 (macos-latest) and x86_64 (macos-13) runners.
-          if ! colima start --vm-type=qemu --cpu 2 --memory 6 --disk 20 ; then
-            echo "QEMU start failed; cleaning up colima state and retrying..."
-            colima delete --force 2>/dev/null || true
-            colima start --vm-type=qemu --cpu 2 --memory 6 --disk 20
-          fi
-          # Wait until Docker daemon is responsive (more reliable than colima status)
-          for i in $(seq 1 90); do docker info >/dev/null 2>&1 && echo "Docker ready after ${i}s" && break || sleep 2; done
-        timeout-minutes: 15
+        uses: docker/setup-docker-action@v5
+        env:
+          LIMA_START_ARGS: "--cpus 4 --memory 8"
 
       # Windows runners use Windows containers by default; switch to Linux containers.
       # This step tries multiple approaches in order:
