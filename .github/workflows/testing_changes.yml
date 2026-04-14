@@ -109,8 +109,11 @@ jobs:
         run: |
           brew install colima docker
           # Try vz driver first (faster on Apple Silicon / macOS ≥ 13); fall back to qemu on failure
-          colima start --vm-type=vz --cpu 2 --memory 6 --disk 60 || \
+          if ! colima start --vm-type=vz --cpu 2 --memory 6 --disk 60 ; then
+            echo "VZ driver failed; cleaning up colima state and retrying with QEMU..."
+            colima delete --force 2>/dev/null || true
             colima start --vm-type=qemu --cpu 2 --memory 6 --disk 60
+          fi
           # Wait until Docker daemon is responsive (more reliable than colima status)
           for i in $(seq 1 90); do docker info >/dev/null 2>&1 && echo "Docker ready after ${i}s" && break || sleep 2; done
         timeout-minutes: 15
