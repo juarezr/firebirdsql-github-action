@@ -60,10 +60,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ "ubuntu-latest", "windows-latest", "macos-latest", "macos-13" ]
+        os: [ "ubuntu-latest", "windows-latest", "macos-13" ]
         # ubuntu-latest:  https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
-        # macos-latest:   https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md  (ARM64)
-        # macos-13:       https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md       (x86_64)
+        # macos-13:       https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md       (x86_64/amd64)
+        # macos-latest (ARM64/macos-15) is excluded: nested virtualisation required for Docker is not supported
         # windows-latest: https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md
         target: [ 'latest', '5', '5.0.2', '5-noble', '5-jammy', '4', '4.0.5', '3', '3.0.12' ]
         # https://github.com/FirebirdSQL/firebird-docker
@@ -74,11 +74,6 @@ jobs:
           - { os: "windows-latest", target: "5-jammy" }
           - { os: "windows-latest", target: "4.0.5" }
           - { os: "windows-latest", target: "3.0.12" }
-          - { os: "macos-latest",   target: "5.0.2" }
-          - { os: "macos-latest",   target: "5-noble" }
-          - { os: "macos-latest",   target: "5-jammy" }
-          - { os: "macos-latest",   target: "4.0.5" }
-          - { os: "macos-latest",   target: "3.0.12" }
           - { os: "macos-13",       target: "5.0.2" }
           - { os: "macos-13",       target: "5-noble" }
           - { os: "macos-13",       target: "5-jammy" }
