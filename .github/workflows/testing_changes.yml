@@ -64,7 +64,7 @@ jobs:
         # ubuntu-latest:  https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
         # macos-latest:   https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md  (ARM64)
         # macos-13:       https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md       (x86_64)
-        # windows-latest: https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md
+        # windows-latest: https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md
         target: [ 'latest', '5', '5.0.2', '5-noble', '5-jammy', '4', '4.0.5', '3', '3.0.12' ]
         # https://github.com/FirebirdSQL/firebird-docker
         exclude:
@@ -116,19 +116,61 @@ jobs:
         timeout-minutes: 15
 
       # Windows runners use Windows containers by default; switch to Linux containers.
-      # DockerCli.exe is only present when Docker Desktop is installed (not on GitHub-hosted runners
-      # which ship Docker Engine/Moby already configured for Linux containers), so guard the call.
+      # This step tries multiple approaches in order:
+      #   1. DockerCli.exe (Docker Desktop - not present on GitHub-hosted runners)
+      #   2. docker context use desktop-linux (available in some Docker configurations)
+      #   3. npipe:////./pipe/docker_engine_linux (Linux containers named pipe on Windows)
+      # The DOCKER_HOST is persisted to GITHUB_ENV so all subsequent steps use it.
       - name: Switch to Linux containers on Windows
         if: github.event_name != 'release' && runner.os == 'Windows'
         shell: pwsh
         run: |
+          $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+          Write-Host "Docker OS type (initial): $osType"
+
+          if ($osType -eq 'linux') {
+            Write-Host "Docker is already in Linux containers mode."
+            exit 0
+          }
+
+          # Method 1: DockerCli.exe (Docker Desktop)
           $dockerCli = 'C:\Program Files\Docker\Docker\DockerCli.exe'
           if (Test-Path $dockerCli) {
+            Write-Host "Switching Docker Desktop to Linux containers via DockerCli.exe..."
             & $dockerCli -SwitchLinuxEngine
-            Start-Sleep -Seconds 10
-          } else {
-            Write-Host "DockerCli.exe not found – Docker Engine is already configured for Linux containers."
+            Start-Sleep -Seconds 30
+            $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+            Write-Host "Docker OS type after DockerCli switch: $osType"
+            if ($osType -eq 'linux') { exit 0 }
           }
+
+          # Method 2: docker context use desktop-linux
+          $contexts = (docker context ls --format '{{.Name}}' 2>&1)
+          Write-Host "Available Docker contexts: $contexts"
+          if ($contexts -match 'desktop-linux') {
+            Write-Host "Switching to desktop-linux Docker context..."
+            docker context use desktop-linux
+            Start-Sleep -Seconds 10
+            $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+            Write-Host "Docker OS type after context switch: $osType"
+            if ($osType -eq 'linux') { exit 0 }
+          }
+
+          # Method 3: Linux containers named pipe (available when Docker Engine has Hyper-V support)
+          Write-Host "Trying Linux containers named pipe..."
+          $env:DOCKER_HOST = 'npipe:////./pipe/docker_engine_linux'
+          $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+          Write-Host "Docker OS type via linux pipe: $osType"
+          if ($osType -eq 'linux') {
+            Write-Host "Connected to Linux containers daemon via named pipe."
+            "DOCKER_HOST=npipe:////./pipe/docker_engine_linux" | Out-File -FilePath $env:GITHUB_ENV -Append
+            exit 0
+          }
+          $env:DOCKER_HOST = ''
+
+          Write-Host "::error::Unable to switch Docker to Linux containers mode on this runner."
+          Write-Host "::error::Tried: DockerCli.exe, docker context desktop-linux, npipe docker_engine_linux."
+          exit 1
 
       - name: Report Docker version on ${{ matrix.os }}
         if: github.event_name != 'release'
