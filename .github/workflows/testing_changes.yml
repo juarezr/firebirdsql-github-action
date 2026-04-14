@@ -187,19 +187,22 @@ jobs:
             $distroName = $ubuntuDistro.Trim()
             Write-Host "Preparing Docker daemon in WSL2 ($distroName)..."
             # Install dockerd inside WSL2 if not already present
-            wsl -d $distroName -- bash -c "command -v dockerd >/dev/null 2>&1 || (export DEBIAN_FRONTEND=noninteractive && sudo apt-get update -qq && sudo apt-get install -y -qq docker.io)"
+            $installOut = wsl -d $distroName -- bash -c "command -v dockerd >/dev/null 2>&1 || (export DEBIAN_FRONTEND=noninteractive && sudo apt-get update -q && sudo apt-get install -y -q docker.io 2>&1)"
+            if ($LASTEXITCODE -ne 0) { Write-Host "docker.io install output: $installOut" }
             # Launch dockerd as an independent background process so it outlives this step.
+            # Bind to 127.0.0.1 only; WSL2 port-forwarding exposes this as localhost on Windows.
             # Start-Process creates a child process that survives the current pwsh instance.
-            Write-Host "Starting dockerd in WSL2 ($distroName) on tcp://0.0.0.0:2375..."
-            Start-Process wsl -ArgumentList "-d", $distroName, "--", "sudo", "dockerd", "-H", "tcp://0.0.0.0:2375" -WindowStyle Hidden
+            Write-Host "Starting dockerd in WSL2 ($distroName) on tcp://127.0.0.1:2375..."
+            Start-Process wsl -ArgumentList "-d", $distroName, "--", "sudo", "dockerd", "-H", "tcp://127.0.0.1:2375" -WindowStyle Hidden
             # Poll until dockerd is ready (up to 60 s)
             $env:DOCKER_HOST = 'tcp://localhost:2375'
             $osType = ''
             for ($i = 1; $i -le 12; $i++) {
               Start-Sleep -Seconds 5
-              $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+              $dockerInfoOut = (docker info --format '{{.OSType}}' 2>&1)
+              $osType = $dockerInfoOut -replace '\s', ''
               if ($osType -eq 'linux') { break }
-              Write-Host "Waiting for WSL2 dockerd... ($($i * 5)s elapsed)"
+              Write-Host "Waiting for WSL2 dockerd... ($($i * 5)s elapsed); docker info: $dockerInfoOut"
             }
             Write-Host "Docker OS type via WSL2 daemon: $osType"
             if ($osType -eq 'linux') {
