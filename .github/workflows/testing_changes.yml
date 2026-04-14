@@ -138,6 +138,7 @@ jobs:
           if (Test-Path $dockerCli) {
             Write-Host "Switching Docker Desktop to Linux containers via DockerCli.exe..."
             & $dockerCli -SwitchLinuxEngine
+            # Wait for the Linux daemon to finish starting up (Docker Desktop takes ~30 s to restart)
             Start-Sleep -Seconds 30
             $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
             Write-Host "Docker OS type after DockerCli switch: $osType"
@@ -166,7 +167,6 @@ jobs:
             "DOCKER_HOST=npipe:////./pipe/docker_engine_linux" | Out-File -FilePath $env:GITHUB_ENV -Append
             exit 0
           }
-          $env:DOCKER_HOST = ''
 
           Write-Host "::error::Unable to switch Docker to Linux containers mode on this runner."
           Write-Host "::error::Tried: DockerCli.exe, docker context desktop-linux, npipe docker_engine_linux."
