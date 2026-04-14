@@ -108,8 +108,11 @@ jobs:
         if: github.event_name != 'release' && runner.os == 'macOS'
         run: |
           brew install colima docker
-          colima start
-          while ! colima status 2>/dev/null | grep -q "running"; do sleep 2; done
+          # Try vz driver first (faster on Apple Silicon / macOS ≥ 13); fall back to qemu on failure
+          colima start --vm-type=vz --cpu 2 --memory 6 --disk 60 || \
+            colima start --vm-type=qemu --cpu 2 --memory 6 --disk 60
+          # Wait until Docker daemon is responsive (more reliable than colima status)
+          for i in $(seq 1 90); do docker info >/dev/null 2>&1 && echo "Docker ready after ${i}s" && break || sleep 2; done
         timeout-minutes: 15
 
       # Windows runners use Windows containers by default; switch to Linux containers.
