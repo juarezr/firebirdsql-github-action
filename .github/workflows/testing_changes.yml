@@ -108,7 +108,8 @@ jobs:
         if: github.event_name != 'release' && runner.os == 'macOS'
         run: |
           brew install colima docker
-          colima start --wait
+          colima start
+          while ! colima status 2>/dev/null | grep -q "running"; do sleep 2; done
         timeout-minutes: 15
 
       # Windows runners use Windows containers by default; switch to Linux containers
