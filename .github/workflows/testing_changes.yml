@@ -123,6 +123,7 @@ jobs:
       #   1. DockerCli.exe (Docker Desktop - not present on GitHub-hosted runners)
       #   2. docker context use desktop-linux (available in some Docker configurations)
       #   3. npipe:////./pipe/docker_engine_linux (Linux containers named pipe on Windows)
+      #   4. WSL2 Ubuntu: install dockerd if needed and start it on tcp://0.0.0.0:2375
       # The DOCKER_HOST is persisted to GITHUB_ENV so all subsequent steps use it.
       - name: Switch to Linux containers on Windows
         if: github.event_name != 'release' && runner.os == 'Windows'
@@ -170,9 +171,46 @@ jobs:
             "DOCKER_HOST=npipe:////./pipe/docker_engine_linux" | Out-File -FilePath $env:GITHUB_ENV -Append
             exit 0
           }
+          $env:DOCKER_HOST = ''
+
+          # Method 4: Start Docker daemon in WSL2 Ubuntu and expose it on TCP 2375.
+          # GitHub-hosted Windows runners include WSL2 with an Ubuntu distribution.
+          # WSL2 port-forwarding makes tcp://localhost:2375 accessible from Windows.
+          Write-Host "Trying Docker daemon via WSL2..."
+          # WSL --list --quiet outputs UTF-16 with embedded null bytes; strip them.
+          $wslDistros = (wsl --list --quiet 2>&1) |
+            ForEach-Object { ($_ -replace '\x00', '').Trim() } |
+            Where-Object { $_ -match '\S' }
+          Write-Host "WSL2 distributions: $($wslDistros -join ', ')"
+          $ubuntuDistro = $wslDistros | Where-Object { $_ -match '^Ubuntu' } | Select-Object -First 1
+          if ($ubuntuDistro) {
+            $distroName = $ubuntuDistro.Trim()
+            Write-Host "Preparing Docker daemon in WSL2 ($distroName)..."
+            # Install dockerd inside WSL2 if not already present
+            wsl -d $distroName -- bash -c "command -v dockerd >/dev/null 2>&1 || (export DEBIAN_FRONTEND=noninteractive && sudo apt-get update -qq && sudo apt-get install -y -qq docker.io)"
+            # Launch dockerd as an independent background process so it outlives this step.
+            # Start-Process creates a child process that survives the current pwsh instance.
+            Write-Host "Starting dockerd in WSL2 ($distroName) on tcp://0.0.0.0:2375..."
+            Start-Process wsl -ArgumentList "-d", $distroName, "--", "sudo", "dockerd", "-H", "tcp://0.0.0.0:2375" -WindowStyle Hidden
+            # Poll until dockerd is ready (up to 60 s)
+            $env:DOCKER_HOST = 'tcp://localhost:2375'
+            $osType = ''
+            for ($i = 1; $i -le 12; $i++) {
+              Start-Sleep -Seconds 5
+              $osType = (docker info --format '{{.OSType}}' 2>&1) -replace '\s', ''
+              if ($osType -eq 'linux') { break }
+              Write-Host "Waiting for WSL2 dockerd... ($($i * 5)s elapsed)"
+            }
+            Write-Host "Docker OS type via WSL2 daemon: $osType"
+            if ($osType -eq 'linux') {
+              Write-Host "Connected to Linux Docker daemon via WSL2."
+              "DOCKER_HOST=tcp://localhost:2375" | Out-File -FilePath $env:GITHUB_ENV -Append
+              exit 0
+            }
+          }
 
           Write-Host "::error::Unable to switch Docker to Linux containers mode on this runner."
-          Write-Host "::error::Tried: DockerCli.exe, docker context desktop-linux, npipe docker_engine_linux."
+          Write-Host "::error::Tried: DockerCli.exe, docker context desktop-linux, npipe docker_engine_linux, WSL2 dockerd."
           exit 1
 
       - name: Report Docker version on ${{ matrix.os }}
