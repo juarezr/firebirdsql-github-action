@@ -65,11 +65,11 @@ for INPUT_VERSION in latest 5 5.0.2 5-noble 5-jammy 4 4.0.5 3 3.0.12; do
     msg "Querying the FirebirdSQL server inside the docker container at [${IP_ADDRESS}]..."
 
     # shellcheck disable=SC2016
-    if ! echo 'SELECT * FROM rdb$database;' |
+    if ! echo 'SELECT * FROM rdb$roles;' |
         docker run -i --rm --name "${INPUT_CONTAINER_NAME}-client2" \
             --network "${INPUT_NETWORK_NAME}" --env IP_ADDRESS="${IP_ADDRESS}" \
             "firebirdsql/firebird:${INPUT_VERSION:-}" \
-            sh -c isql -bail -quiet -echo -merge -m2 -z \
+            sh -c isql -bail -quiet -z \
             -user "${INPUT_FIREBIRD_USER}" -password "${INPUT_FIREBIRD_PASSWORD}" \
             "${IP_ADDRESS}:${FIREBIRD_DATA}/${INPUT_FIREBIRD_DATABASE}" | ident; 
         then
